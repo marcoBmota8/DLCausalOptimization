@@ -20,3 +20,14 @@ published TabNet which inherently provides with feature importance measure
 through its sequential-attention mechanism. Our objective is to determine the
 benefits of each optimizer in training deep learning model from a causal inference
 perspective
+
+---------
+
+### Useful links
+* https://medium.com/analytics-vidhya/entropy-sgd-biasing-gradient-descent-into-wide-valleys-af3c9df03ac6
+* https://github.com/ucla-vision/entropy-sgd
+* https://arxiv.org/pdf/1908.07442.pdf
+* https://github.com/dreamquark-ai/tabnet/tree/develop
+* https://github.com/davda54/sam?tab=readme-ov-file
+* https://paperswithcode.com/paper/sharpness-aware-minimization-for-efficiently-1
+* https://github.com/cpflat/causaltestdata
