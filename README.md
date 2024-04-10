@@ -1,5 +1,6 @@
 # DLCausalOptimization
-CS 8395: Deep Learning - Final project - Spring 2024
+### CS 8395: Deep Learning - Final project - Spring 2024
+
 Solutions from wide minima in the loss function have been shown to provide
 deep learning models with better generalizability. These flatter regions of the loss
 landscape are promoted by some optimizers such as stochastic gradient descent
