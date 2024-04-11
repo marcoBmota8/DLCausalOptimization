@@ -66,3 +66,20 @@ class DataGenerator:
         data = pd.DataFrame(data.detach().numpy(), columns=[f'X{i}' for i in range(1, self.p+1)])
 
         return data
+    
+    def find_ancestors(adjacency_matrix, node):
+        visited = set()
+        stack = [node]
+        reference_node = node
+
+        while stack:
+            node = stack.pop()
+            if node not in visited:
+                visited.add(node)
+                stack.extend(np.where(adjacency_matrix[:, node])[0])
+        # Remove the node itself if there is no self-loop
+        if adjacency_matrix[reference_node, reference_node] == 0:
+            visited.remove(reference_node)
+
+        return list(visited)
+    
