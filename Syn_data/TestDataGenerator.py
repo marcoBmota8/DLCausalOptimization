@@ -8,14 +8,19 @@ import networkx as nx
 from Gen_syn_data import DataGenerator
 
 # %%
-# define DAG
-A = np.array([
-    [0,1,1,0],
-    [0,0,1,1],
-    [0,0,0,1],
-    [0,0,0,0]
-    ])
+# Generate synthetic data
+datagen = DataGenerator(
+    p=7,
+    n=30,
+    noise=1e-2,
+    threshold=0.5
+)
 
+# %%
+# define DAG
+A = datagen.generate_sparse_dag(p=7)
+
+# %%
 # Create directed graph from adjacency matrix
 G = nx.from_numpy_array(A, create_using=nx.DiGraph)
 
@@ -34,15 +39,7 @@ nx.draw_networkx_labels(G, pos, labels=labels, font_color='white')
 nx.draw_networkx_edges(G, pos, node_size=1000, arrowstyle='-|>', arrowsize=20, width=2)
 
 plt.show()
-# %%
-# Generate synthetic data
-datagen = DataGenerator(
-    adjacency_matrix=A,
-    p=4,
-    n=30,
-    noise=1e-2,
-    threshold=0.5
-)
+
 # %%
 df = datagen.generate_data()
 # %%

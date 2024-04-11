@@ -4,12 +4,13 @@ import torch
 import torch.nn as nn
 
 class DataGenerator:
-    def __init__(self, adjacency_matrix, p, n, noise, threshold):
-        self.adjacency_matrix = adjacency_matrix
+    def __init__(self, p, n, noise, threshold):
         self.p = p
         self.n = n
         self.noise = noise
         self.threshold = threshold
+        
+        self.adjanceny_matrix = self.generate_sparse_dag(p=self.p, n_branches=self.n_branches)
 
         # Define the unknown functions
         self.functions = [
@@ -67,7 +68,7 @@ class DataGenerator:
 
         return data
     
-    def find_ancestors(adjacency_matrix, node):
+    def find_ancestors(self, adjacency_matrix, node):
         visited = set()
         stack = [node]
         reference_node = node
@@ -83,3 +84,63 @@ class DataGenerator:
 
         return list(visited)
     
+    def generate_sparse_dag(self, p, n_branches):
+        cycles = False
+        while not cycles:
+            # Initialize an empty adjacency matrix
+            adjacency_matrix = np.zeros((p, p))
+
+            # Randomly select "n_branches" nodes to be the roots of the DAG branches
+            roots = np.random.choice(p, n_branches, replace=False)
+
+            # Add edges from the roots to other nodes
+            for root in roots:
+                children = np.random.choice([node for node in range(p) if node not in roots], size=np.random.randint(1, p//2), replace=False)
+                adjacency_matrix[root, children] = 1
+
+            # Add edges from the other nodes to the sink node
+            for node in range(p):
+                if node not in roots and adjacency_matrix[:, node].sum() == 0:
+                    children = np.random.choice([child for child in range(p) if child > node], size=np.random.randint(1, p//2), replace=False)
+                    adjacency_matrix[node, children] = 1
+
+            # Make sure all nodes point to a single sink node
+            sink = np.random.choice([node for node in range(p) if adjacency_matrix[node, :].sum() == 0])
+            adjacency_matrix[(adjacency_matrix.sum(axis=1) > 0) & (adjacency_matrix.sum(axis=0) == 0), sink] = 1
+            
+            # check for cycles
+            cycles = self.is_cyclic(adjacency_matrix) # TODO check this can be avoided by ensuring all generated adjacency matrices are DAGs
+
+        return adjacency_matrix
+
+    def is_cyclic_util(self, adjacency_matrix, node, visited, recursion_stack):
+        # checks if a cycle exists starting from a given node.
+        visited[node] = True
+        recursion_stack[node] = True
+
+        for child in np.where(adjacency_matrix[node, :])[0]:
+            if visited[child] == False:
+                if self.is_cyclic_util(adjacency_matrix, child, visited, recursion_stack) == True:
+                    return True
+            elif recursion_stack[child] == True:
+                return True
+
+        recursion_stack[node] = False
+        return False
+    
+    def is_cyclic(self, adjacency_matrix):
+        # Checks if adjacency matrix contains cycle(s)
+        n = len(adjacency_matrix)
+        visited = [False] * n
+        recursion_stack = [False] * n
+        for node in range(n):
+            if visited[node] == False:
+                if self.is_cyclic_util(adjacency_matrix, node, visited, recursion_stack) == True:
+                    return True
+        return False
+    
+    def generate_irrelevant_features(self, k):
+        # TODO generate irrelevant features by drawing from gaussian and non-gaussian distributions and add them to the dataset
+        return
+        
+        # TODO format output (data and ancestors indices) in generate_data function
