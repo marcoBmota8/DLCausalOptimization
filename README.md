@@ -30,4 +30,3 @@ perspective
 * https://github.com/dreamquark-ai/tabnet/tree/develop
 * https://github.com/davda54/sam?tab=readme-ov-file
 * https://paperswithcode.com/paper/sharpness-aware-minimization-for-efficiently-1
-* https://github.com/cpflat/causaltestdata
