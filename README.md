@@ -30,4 +30,5 @@ perspective
 * https://github.com/dreamquark-ai/tabnet/tree/develop
 * https://github.com/davda54/sam?tab=readme-ov-file
 * https://paperswithcode.com/paper/sharpness-aware-minimization-for-efficiently-1
+* https://arxiv.org/pdf/2202.00661.pdf -> Comparison of SWA and SAM. They point to future work the exploration how optimizers do in causal ML which if the objective of this project.
 * https://pytorch.org/blog/stochastic-weight-averaging-in-pytorch/ - > If time allows, SWA could be another optimizer to try.
