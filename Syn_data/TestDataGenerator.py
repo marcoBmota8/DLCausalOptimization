@@ -11,7 +11,6 @@ from Gen_syn_data import DataGenerator
 # Generate synthetic data
 datagen = DataGenerator(
     p=7,
-    n=30,
     noise=1e-2,
     threshold=0.5
 )
