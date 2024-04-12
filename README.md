@@ -30,3 +30,4 @@ perspective
 * https://github.com/dreamquark-ai/tabnet/tree/develop
 * https://github.com/davda54/sam?tab=readme-ov-file
 * https://paperswithcode.com/paper/sharpness-aware-minimization-for-efficiently-1
+* https://pytorch.org/blog/stochastic-weight-averaging-in-pytorch/ - > If time allows, SWA could be another optimizer to try.
