@@ -10,14 +10,13 @@ from Gen_syn_data import DataGenerator
 # %%
 # Generate synthetic data
 datagen = DataGenerator(
-    p=7,
-    noise=1e-2,
-    threshold=0.5
+    p=10,
+    num_irrelevant_dim=3,
+    random_dim=2,
+    n_branches=2
 )
 
-# %%
-# define DAG
-A = datagen.generate_sparse_dag(p=7)
+A = datagen.adjacency_matrix
 
 # %%
 # Create directed graph from adjacency matrix
