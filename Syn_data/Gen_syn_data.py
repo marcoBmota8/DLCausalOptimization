@@ -18,7 +18,6 @@ class DataGenerator:
             self.mlp_leaky_relu,  # MLP with LeakyReLU activation
             nn.LeakyReLU(),  # LeakyReLU
             lambda x: x**3,  # Polynomial of order three
-            lambda x: np.log(x+1e-15), # logarithm
             torch.tanh  # Tanh
         ]
 
@@ -66,7 +65,8 @@ class DataGenerator:
         features_names[self.sink] = 'T'
         
         # Generate the random (distraction) nodes
-        
+        for rv in range(self.dim_random):
+            data = torch.cat((data, self.generate_random_feature(n)), dim=1)
                 
         # convert to DataFrame
         df = pd.DataFrame(data.detach().numpy(), columns=features_names)

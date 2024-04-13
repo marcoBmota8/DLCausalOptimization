@@ -39,5 +39,5 @@ nx.draw_networkx_edges(G, pos, node_size=1000, arrowstyle='-|>', arrowsize=20, w
 plt.show()
 
 # %%
-df = datagen.generate_data()
+df, dag_info = datagen.generate_data(n=40, noise=0.005, threshold=0.5)
 # %%
