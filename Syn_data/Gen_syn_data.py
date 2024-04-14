@@ -4,9 +4,8 @@ import torch
 import torch.nn as nn
 
 class DataGenerator:
-    def __init__(self, p, num_irrelevant_dim, random_dim, n_branches):
-        self.p = p # DAG dimensionality = relevant_dim + irrelevant_dim
-        self.dim_irrev = num_irrelevant_dim # irrelevant number of nodes in the DAG
+    def __init__(self, p, random_dim, n_branches):
+        self.p = p # DAG dimensionality 
         self.dim_random = random_dim # random features
         self.n_branches = n_branches # number of branches to grow the DAG 
         self.adjacency_matrix, self.sink_anc, self.sink = self.generate_dag(p=self.p, n_branches=self.n_branches)
@@ -122,14 +121,20 @@ class DataGenerator:
 
             # Add edges from the roots to other nodes
             for root in roots:
-                children = np.random.choice([node for node in range(p) if node not in roots], size=np.random.randint(1, np.minimum(p-n_branches,p//n_branches)), replace=False)
+                children = np.random.choice([node for node in range(p) if node not in roots], size=np.random.randint(1, p//2), replace=False)
                 adjacency_matrix[root, children] = 1
 
             # Add edges from the other nodes to the sink node
             for node in range(p):
                 if node not in roots and adjacency_matrix[:, node].sum() == 0:
-                    children = np.random.choice([child for child in range(p) if child > node], size=np.random.randint(1, np.minimum(p-node, p//n_branches)), replace=False)
-                    adjacency_matrix[node, children] = 1
+                    valid_children = np.arange(p)[np.arange(p) > root] # nodes that are valid children for current root
+                    if valid_children.size==0:
+                        pass
+                    elif valid_children.size==1:
+                         adjacency_matrix[node, valid_children.item()] = 1
+                    else:
+                        children = np.random.choice(valid_children, size=np.random.randint(1, len(valid_children)), replace=False)
+                        adjacency_matrix[node, children] = 1
 
             # Make sure all nodes point to a single sink node
             sink = np.random.choice([node for node in range(p) if adjacency_matrix[node, :].sum() == 0], size = 1).item()
@@ -140,7 +145,12 @@ class DataGenerator:
             new_roots = np.random.choice(sink_anc, size = np.random.randint(1, len(sink_anc)), replace=False)
             for new_root in new_roots:
                 valid_children = np.arange(p)[~np.isin(np.arange(p),np.append(sink,sink_anc)) & (np.arange(p) > new_root)] # nodes that are valid children for current new_root
-                children = np.random.choice(valid_children, size=np.random.randint(1, len(valid_children)), replace=False)
+                if valid_children.size==0:
+                    pass
+                else:
+                    children = np.random.choice(valid_children, size=np.random.randint(1, len(valid_children)) if len(valid_children)>1 else 1, replace=False)
+                    adjacency_matrix[new_root, children] = 1
+
 
             # check for cycles
             cycles = self.is_cyclic(adjacency_matrix) # TODO check this can be avoided by ensuring all generated adjacency matrices are DAGs

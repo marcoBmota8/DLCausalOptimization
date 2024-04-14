@@ -1,7 +1,4 @@
 # %%
-import os 
-
-import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -10,9 +7,8 @@ from Gen_syn_data import DataGenerator
 # %%
 # Generate synthetic data
 datagen = DataGenerator(
-    p=10,
-    num_irrelevant_dim=3,
-    random_dim=2,
+    p=8,
+    random_dim=4,
     n_branches=2
 )
 
@@ -24,6 +20,7 @@ G = nx.from_numpy_array(A, create_using=nx.DiGraph)
 
 # Create a dictionary of labels
 labels = {i: f'X{i+1}' for i in range(G.number_of_nodes())}
+labels[datagen.sink] = 'T'
 
 # Draw the graph
 # Draw the nodes
