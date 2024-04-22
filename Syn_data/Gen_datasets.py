@@ -15,6 +15,12 @@ METADATA = {
     'random_features_fraction': 0.4 # what fraction of total will be random
 }
 
+METADATA = {
+    'Total_Dimensions': [10,100,1000], # total dimensions (DAG and random)
+    'N': [50],
+    'random_features_fraction': 0.4 # what fraction of total will be random
+}
+
 # %%
 # Generate all dimensions for all experiments
 Ns = [] # Number of instances

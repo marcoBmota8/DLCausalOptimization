@@ -44,19 +44,25 @@ class DataGenerator:
         return model(x)
 
     def generate_data(self, n, noise, threshold):
-        data = torch.from_numpy(np.random.normal(size=(n, self.p)) + noise).float()
-        for i in range(self.p):
-            parents = np.where(self.adjacency_matrix[:, i])[0]
-            if parents.size > 0:
-                fi = np.random.choice(self.functions)
-                pa_data = fi(data[:, parents])
-                # Non MLP functions need to aggregate the contribution of each parent via summation
-                if pa_data.shape[1] > 1:
-                    pa_data = pa_data.sum(axis=1).unsqueeze(dim=1)
-                data[:, i] = pa_data.squeeze(dim=1)
+        min_frac_classes = 0
+        while (min_frac_classes>0.7) or (min_frac_classes<0.2): # Check that at least 20/70 of both classes
+            data = torch.from_numpy(np.random.normal(size=(n, self.p)) + noise).float()
+            for i in range(self.p):
+                parents = np.where(self.adjacency_matrix[:, i])[0]
+                if parents.size > 0:
+                    fi = np.random.choice(self.functions)
+                    pa_data = fi(data[:, parents])
+                    # Non MLP functions need to aggregate the contribution of each parent via summation
+                    if pa_data.shape[1] > 1:
+                        pa_data = pa_data.sum(axis=1).unsqueeze(dim=1)
+                    data[:, i] = pa_data.squeeze(dim=1)
 
-        # Convert the target (node with no children) to binary
-        binary_labels = (torch.sigmoid(data[:,self.sink]) > threshold).int()
+            # Convert the target (node with no children) to binary
+            binary_labels = (torch.sigmoid(data[:,self.sink]) > threshold).int()
+            min_frac_classes = binary_labels.float().mean()
+            
+        # Assign binary labels to the target node
+        print(min_frac_classes)    
         data[:, self.sink] = binary_labels
 
         # Generate strings for features names
