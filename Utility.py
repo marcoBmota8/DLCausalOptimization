@@ -62,7 +62,7 @@ def preprocess(data):
             y_valid = train[target].values[valid_indices]
             y_test = train[target].values[test_indices]
 
-            if (len(y_valid) > 2) and (len(y_test) > 2):
+            if (len(y_valid) > 3) and (len(y_test) > 3):
                 if (not all(c == y_valid[0] for c in y_valid)) and (not all(c == y_test[0] for c in y_test)):
                     break
 
