@@ -9,7 +9,7 @@ import pandas as pd
 import scipy
 import seaborn as sns
 
-from pytorch_tabnet.tab_model import TabNetClassifier
+from Modified_TabNet.tab_model import TabNetClassifier
 from pytorch_tabnet.augmentations import ClassificationSMOTE
 
 from sklearn.preprocessing import LabelEncoder
