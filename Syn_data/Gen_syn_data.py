@@ -142,9 +142,9 @@ class DataGenerator:
                         children = np.random.choice(valid_children, size=np.random.randint(1, len(valid_children)), replace=False)
                         adjacency_matrix[node, children] = 1
 
-            # Make sure all nodes point to a single sink node
+            # Make sure all terminal nodes (potential sink nodes) point to a single sink node (chosen one)
             sink = np.random.choice([node for node in range(p) if adjacency_matrix[node, :].sum() == 0], size = 1).item()
-            adjacency_matrix[(adjacency_matrix.sum(axis=1) > 0) & (adjacency_matrix.sum(axis=0) == 0), sink] = 1
+            adjacency_matrix[(adjacency_matrix.sum(axis=1) > 0) & (adjacency_matrix.sum(axis=0) == 0), sink] = 1 # Make connections between all non-chosen sink nodes and the chosen one
             sink_anc = self.find_ancestors(adjacency_matrix,sink) # Ancestors of the sink node (target)
             
             # Add other sink nodes to the DAG that wont be ancestors of the target
