@@ -132,8 +132,8 @@ class DataGenerator:
 
             # Add edges from the other nodes to the sink node
             for node in range(p):
-                if node not in roots and adjacency_matrix[:, node].sum() == 0:
-                    valid_children = np.arange(p)[np.arange(p) > root] # nodes that are valid children for current root
+                if node not in roots and adjacency_matrix[:, node].sum() == 0: # Parentless nodes excluding roots
+                    valid_children = np.arange(p)[np.arange(p) > root] # TODO verify if this can be generalized
                     if valid_children.size==0:
                         pass
                     elif valid_children.size==1:
