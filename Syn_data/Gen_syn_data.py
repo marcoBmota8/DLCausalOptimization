@@ -12,7 +12,7 @@ class DataGenerator:
 
         # Define the unknown functions
         self.functions = [
-            lambda x: x,  # Simple linear function
+            lambda x: x,  # Identity
             self.mlp_tanh,  # MLP with tanh activation
             self.mlp_leaky_relu,  # MLP with LeakyReLU activation
             nn.LeakyReLU(),  # LeakyReLU
@@ -130,7 +130,7 @@ class DataGenerator:
                 children = np.random.choice([node for node in range(p) if node not in roots], size=np.random.randint(1, p//2), replace=False)
                 adjacency_matrix[root, children] = 1
 
-            # Add edges from the other nodes to the sink node
+            # Create further chains involving more orphan nodes
             for node in range(p):
                 if node not in roots and adjacency_matrix[:, node].sum() == 0: # Parentless nodes excluding roots
                     valid_children = np.arange(p)[np.arange(p) > root] # TODO verify if this can be generalized
@@ -144,7 +144,7 @@ class DataGenerator:
 
             # Make sure all terminal nodes (potential sink nodes) point to a single sink node (chosen one)
             sink = np.random.choice([node for node in range(p) if adjacency_matrix[node, :].sum() == 0], size = 1).item()
-            adjacency_matrix[(adjacency_matrix.sum(axis=1) > 0) & (adjacency_matrix.sum(axis=0) == 0), sink] = 1 # Make connections between all non-chosen sink nodes and the chosen one
+            adjacency_matrix[(adjacency_matrix.sum(axis=1) > 0) & (adjacency_matrix.sum(axis=0) == 0), sink] = 1 # Make connections between all parentless nodes with children and the target node to ensure it has at least n_branches ancestors.
             sink_anc = self.find_ancestors(adjacency_matrix,sink) # Ancestors of the sink node (target)
             
             # Add other sink nodes to the DAG that wont be ancestors of the target
