@@ -43,7 +43,7 @@ class DataGenerator:
         )
         return model(x)
 
-    def generate_data(self, n, noise, threshold):
+    def generate_data(self, n, noise, threshold): # TODO: follow causal order of assignment.
         min_frac_classes = 0
         while (min_frac_classes>0.7) or (min_frac_classes<0.2): # Check that at least 20/70 of both classes
             data = torch.from_numpy(np.random.normal(size=(n, self.p)) + noise).float()
