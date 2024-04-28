@@ -93,7 +93,7 @@ def preprocess(data):
 
     return X_train, y_train, X_valid, y_valid, X_test, y_test, cat_idxs, cat_dims
 
-def generate_classifier(cat_idxs, cat_dims, lr = 0.1, gamma = 0.1, optimizer = torch.optim.SGD, grouped_features = None):
+def generate_classifier(cat_idxs, cat_dims, lr = 0.01, gamma = 0.9, optimizer = torch.optim.SGD, grouped_features = None):
     tabnet_params = {"cat_idxs": cat_idxs,
                      "cat_dims": cat_dims,
                      "cat_emb_dim": 2,
