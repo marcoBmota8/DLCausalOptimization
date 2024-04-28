@@ -41,7 +41,7 @@ for i in range(len(p)):
     
     df, dag_info = datagen.generate_data(n=Ns[i], noise=0.005, threshold=0.5)
     
-    save_path = os.path.join(FILE_DIR,'Datasets',f'N={Ns[i]}_p={p[i]}_d_random={num_random[i]}')
+    save_path = os.path.join(FILE_DIR,'Datasets_V2',f'N={Ns[i]}_p={p[i]}_d_random={num_random[i]}')
     os.makedirs(save_path,exist_ok=True)
     
     # Save data

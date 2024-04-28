@@ -42,27 +42,53 @@ class DataGenerator:
             nn.Linear(10, 1)
         )
         return model(x)
+    
+    def topological_sort(self, adjacency_matrix):
+        # Number of nodes
+        p = adjacency_matrix.shape[0]
+
+        # Perform a topological sort
+        visited = set()
+        order = []
+        for i in range(p):
+            if i not in visited:
+                stack = [i]
+                while stack:
+                    node = stack[-1]
+                    if node not in visited:
+                        visited.add(node)
+                        for j in np.where(adjacency_matrix[node])[0]: # for children of node
+                            if j not in visited:
+                                stack.append(j)
+                    else:
+                        stack.pop()
+                        order.append(node)
+                        
+        topo_order = order[::-1]
+
+        return topo_order
 
     def generate_data(self, n, noise, threshold): # TODO: follow causal order of assignment.
         min_frac_classes = 0
         while (min_frac_classes>0.7) or (min_frac_classes<0.2): # Check that at least 20/70 of both classes
-            data = torch.from_numpy(np.random.normal(size=(n, self.p)) + noise).float()
-            for i in range(self.p):
-                parents = np.where(self.adjacency_matrix[:, i])[0]
+            order = self.topological_sort(self.adjacency_matrix)
+            data = torch.from_numpy(np.random.normal(size=(n, self.p)) + np.random.normal(loc=0.0, scale=noise, size=(n,self.p))).float()
+            for idx in order:
+                parents = np.where(self.adjacency_matrix[:, idx])[0]
                 if parents.size > 0:
                     fi = np.random.choice(self.functions)
                     pa_data = fi(data[:, parents])
                     # Non MLP functions need to aggregate the contribution of each parent via summation
                     if pa_data.shape[1] > 1:
                         pa_data = pa_data.sum(axis=1).unsqueeze(dim=1)
-                    data[:, i] = pa_data.squeeze(dim=1)
+                    data[:, idx] = pa_data.squeeze(dim=1)
 
             # Convert the target (node with no children) to binary
             binary_labels = (torch.sigmoid(data[:,self.sink]) > threshold).int()
             min_frac_classes = binary_labels.float().mean()
             
         # Assign binary labels to the target node
-        print(min_frac_classes)    
+        print('Fraction of 1s in the binary target: ',min_frac_classes)    
         data[:, self.sink] = binary_labels
 
         # Generate strings for features names
@@ -133,7 +159,7 @@ class DataGenerator:
             # Create further chains involving more orphan nodes
             for node in range(p):
                 if node not in roots and adjacency_matrix[:, node].sum() == 0: # Parentless nodes excluding roots
-                    valid_children = np.arange(p)[np.arange(p) > root] # TODO verify if this can be generalized
+                    valid_children = np.arange(p)[np.arange(p) > root]  # TODO: can improve on this by doing DFS or BFS and find possible children among all nodes without incurring into cycles 
                     if valid_children.size==0:
                         pass
                     elif valid_children.size==1:
