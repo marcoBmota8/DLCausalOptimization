@@ -17,9 +17,11 @@ from sklearn.metrics import roc_auc_score
 
 def get_files(N, p, d):
     file = os.path.join(os.getcwd(), "Syn_data/Datasets/N=" + str(N) + "_p=" + str(p) + "_d_random=" + str(d) + "/data.pkl")
+    # file = os.path.join(os.getcwd(), "Syn_data/Datasets_V2/N=" + str(N) + "_p=" + str(p) + "_d_random=" + str(d) + "/data.pkl")
     with open(file, "rb") as input_file:
         data_file = pickle.load(input_file)
     file = os.path.join(os.getcwd(), "Syn_data/Datasets/N=" + str(N) + "_p=" + str(p) + "_d_random=" + str(d) + "/dag_info.pkl")
+    # file = os.path.join(os.getcwd(), "Syn_data/Datasets_V2/N=" + str(N) + "_p=" + str(p) + "_d_random=" + str(d) + "/dag_info.pkl")
     with open(file, "rb") as input_file:
         info_file = pickle.load(input_file)
     return data_file, info_file
@@ -162,7 +164,7 @@ def false_rates(feature_importances, relevant, irrelevant, random):
     false_positive_i = 0
     false_positive_r = 0
     for i in relevant:
-        if i < median:
+        if i <= median:
             false_negative += 1
     for i in irrelevant:
         if i > median:

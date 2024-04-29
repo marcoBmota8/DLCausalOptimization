@@ -39,6 +39,7 @@ import copy
 import scipy
 
 from sam import SAM
+from torchcontrib.optim import SWA
 from torch.nn.modules.batchnorm import _BatchNorm
 
 @dataclass
@@ -275,6 +276,9 @@ class TabModel(BaseEstimator):
         self._callback_container.on_train_end()
         self.network.eval()
 
+        # SWA
+        self._optimizer.swap_swa_sgd()
+
         if self.compute_importance:
             # compute feature importance once the best model is defined
             self.feature_importances_ = self._compute_feature_importances(X_train)
@@ -488,6 +492,8 @@ class TabModel(BaseEstimator):
         for batch_idx, (X, y) in enumerate(train_loader):
             self._callback_container.on_batch_begin(batch_idx)
 
+            # SWA
+            self._optimizer.optimizer.zero_grad()
             batch_logs = self._train_batch(X, y)
 
             self._callback_container.on_batch_end(batch_idx, batch_logs)
@@ -526,10 +532,30 @@ class TabModel(BaseEstimator):
         for param in self.network.parameters():
             param.grad = None
 
-        # First forward-backward step
-        enable_running_stats(self.network)
+        # # SAM
+        # # First forward-backward step
+        # enable_running_stats(self.network)
 
+        # output, M_loss = self.network(X)
+
+        # loss = self.compute_loss(output, y)
+        # # Add the overall sparsity loss
+        # loss = loss - self.lambda_sparse * M_loss
+
+        # # Perform backward pass and optimization
+        # loss.backward()
+        # if self.clip_value:
+        #     clip_grad_norm_(self.network.parameters(), self.clip_value)
+        # self._optimizer.first_step(zero_grad=True)
+
+        # # Second forward-backward step
+        # disable_running_stats(self.network)
+
+        # output, M_loss = self.network(X)
+
+        # SWA
         output, M_loss = self.network(X)
+
 
         loss = self.compute_loss(output, y)
         # Add the overall sparsity loss
@@ -539,22 +565,8 @@ class TabModel(BaseEstimator):
         loss.backward()
         if self.clip_value:
             clip_grad_norm_(self.network.parameters(), self.clip_value)
-        self._optimizer.first_step(zero_grad=True)
-
-        # Second forward-backward step
-        disable_running_stats(self.network)
-
-        output, M_loss = self.network(X)
-
-        loss = self.compute_loss(output, y)
-        # Add the overall sparsity loss
-        loss = loss - self.lambda_sparse * M_loss
-
-        # Perform backward pass and optimization
-        loss.backward()
-        if self.clip_value:
-            clip_grad_norm_(self.network.parameters(), self.clip_value)
-        self._optimizer.second_step(zero_grad=True)
+        self._optimizer.step()
+        # self._optimizer.second_step(zero_grad=True)
 
 
         batch_logs["loss"] = loss.cpu().detach().numpy().item()
@@ -713,7 +725,7 @@ class TabModel(BaseEstimator):
             scheduler = LRSchedulerCallback(
                 scheduler_fn=self.scheduler_fn,
                 scheduler_params=self.scheduler_params,
-                optimizer=self._optimizer.base_optimizer,
+                optimizer=self._optimizer, # .base_optimizer for SAM
                 early_stopping_metric=self.early_stopping_metric,
                 is_batch_level=is_batch_level,
             )
@@ -729,7 +741,13 @@ class TabModel(BaseEstimator):
         # self._optimizer = self.optimizer_fn(
         #     self.network.parameters(), **self.optimizer_params
         # )
-        self._optimizer = SAM(self.network.parameters(), self.optimizer_fn, **self.optimizer_params, momentum = 0.9, weight_decay=0.0005, adaptive=True)
+
+        # # SAM
+        # self._optimizer = SAM(self.network.parameters(), self.optimizer_fn, **self.optimizer_params, momentum = 0.9, weight_decay=0.0005, adaptive=True)
+
+        # SWA
+        opt_temp = self.optimizer_fn(self.network.parameters(), **self.optimizer_params)
+        self._optimizer = SWA(opt_temp, swa_start=10, swa_freq=5, swa_lr=0.01)
 
     def _construct_loaders(self, X_train, y_train, eval_set):
         """Generate dataloaders for train and eval set.
